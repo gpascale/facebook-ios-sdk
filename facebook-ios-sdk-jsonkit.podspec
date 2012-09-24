@@ -1,5 +1,5 @@
 Pod::Spec.new do |s|
-  s.name         =  'facebook-ios-sdk'
+  s.name         =  'facebook-ios-sdk-jsonkit'
   s.version      =  '3.0.8'
   s.platform     =  :ios
   s.license      =  'Apache License, Version 2.0'

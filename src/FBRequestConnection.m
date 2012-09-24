@@ -15,7 +15,7 @@
  */
 
 #import <UIKit/UIImage.h>
-#import "JSON.h"
+#import "JSONKit.h"
 #import "FBError.h"
 #import "FBURLConnection.h"
 #import "FBRequestBody.h"
@@ -724,9 +724,7 @@ typedef enum FBRequestConnectionState {
              attachments:attachments];
     }
     
-    SBJSON *writer = [[SBJSON alloc] init];
-    NSString *jsonBatch = [writer stringWithObject:batch];
-    [writer release];
+    NSString *jsonBatch = [batch JSONString];
     [batch release];
 
     [body appendWithKey:kBatchKey formValue:jsonBatch logger:logger];
@@ -1068,8 +1066,7 @@ typedef enum FBRequestConnectionState {
 {
     id parsed = nil;
     if (!(*error)) {
-        SBJSON *parser = [[SBJSON alloc] init];
-        parsed = [parser objectWithString:utf8 error:error];
+        parsed = [utf8 objectFromJSONStringWithParseOptions:JKParseOptionStrict error:error];
         // if we fail parse we attemp a reparse of a modified input to support results in the form "foo=bar", "true", etc.
         if (*error) {
             // we round-trip our hand-wired response through the parser in order to remain
@@ -1078,14 +1075,13 @@ typedef enum FBRequestConnectionState {
             NSDictionary *original = [NSDictionary dictionaryWithObjectsAndKeys:
                                       utf8, FBNonJSONResponseProperty,
                                       nil];
-            NSString *jsonrep = [parser stringWithObject:original];
+            NSString *jsonrep = [original JSONString];
             NSError *reparseError = nil;
-            parsed = [parser objectWithString:jsonrep error:&reparseError];
+            parsed = [jsonrep objectFromJSONStringWithParseOptions:JKParseOptionStrict error:&reparseError];
             if (!reparseError) {
                 *error = nil;
             }
         }
-        [parser release];
     }
     return parsed;
 }
